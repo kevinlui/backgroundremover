@@ -186,6 +186,7 @@ def main():
     args = ap.parse_args()
     if args.input.name.rsplit('.', 1)[1] in ['mp4', 'mov', 'webm', 'ogg', 'gif']:
         if args.mattekey:
+            print("utilities.matte_key")
             utilities.matte_key(os.path.abspath(args.output.name), os.path.abspath(args.input.name),
                                 worker_nodes=args.workernodes,
                                 gpu_batchsize=args.gpubatchsize,
@@ -193,6 +194,7 @@ def main():
                                 frame_limit=args.framelimit,
                                 framerate=args.framerate)
         elif args.transparentvideo:
+            print("utilities.transparentvideo")
             utilities.transparentvideo(os.path.abspath(args.output.name), os.path.abspath(args.input.name),
                                        worker_nodes=args.workernodes,
                                        gpu_batchsize=args.gpubatchsize,
@@ -200,6 +202,7 @@ def main():
                                        frame_limit=args.framelimit,
                                        framerate=args.framerate)
         elif args.transparentvideoovervideo:
+            print("utilities.transparentvideoovervideo")
             utilities.transparentvideoovervideo(os.path.abspath(args.output.name), os.path.abspath(args.backgroundvideo.name),
                                                 os.path.abspath(args.input.name),
                                                 worker_nodes=args.workernodes,
@@ -208,6 +211,7 @@ def main():
                                                 frame_limit=args.framelimit,
                                                 framerate=args.framerate)
         elif args.transparentvideooverimage:
+            print("utilities.transparentvideooverimage")
             utilities.transparentvideooverimage(os.path.abspath(args.output.name), os.path.abspath(args.backgroundimage.name),
                                                 os.path.abspath(args.input.name),
                                                 worker_nodes=args.workernodes,
@@ -216,6 +220,7 @@ def main():
                                                 frame_limit=args.framelimit,
                                                 framerate=args.framerate)
         elif args.transparentgif:
+            print("utilities.transparentgif")
             utilities.transparentgif(os.path.abspath(args.output.name), os.path.abspath(args.input.name),
                                      worker_nodes=args.workernodes,
                                      gpu_batchsize=args.gpubatchsize,
@@ -223,6 +228,7 @@ def main():
                                      frame_limit=args.framelimit,
                                      framerate=args.framerate)
         elif args.transparentgifwithbackground:
+            print("utilities.transparentgifwithbackground")
             utilities.transparentgifwithbackground(os.path.abspath(args.output.name), os.path.abspath(args.backgroundimage.name), os.path.abspath(args.input.name),
                                                    worker_nodes=args.workernodes,
                                                    gpu_batchsize=args.gpubatchsize,
@@ -231,9 +237,17 @@ def main():
                                                    framerate=args.framerate)
 
     else:
-        print(args.output.name)
+        print("args.model: ", args.model)
+        print("args.alpha_matting: ", args.alpha_matting)
+        print("alpha_matting_foreground_threshold: ", args.alpha_matting_foreground_threshold)
+        print("alpha_matting_background_threshold: ", args.alpha_matting_background_threshold)
+        print("alpha_matting_erode_size: ", args.alpha_matting_erode_size)
+        print("alpha_matting_base_size: ", args.alpha_matting_base_size)
+        print("args.output.name: ", args.output.name)
+
         r = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
         w = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
+        
         w(
             args.output,
             remove(

@@ -6,6 +6,7 @@ from pymatting.alpha.estimate_alpha_cf import estimate_alpha_cf
 from pymatting.foreground.estimate_foreground_ml import estimate_foreground_ml
 from pymatting.util.util import stack_images
 from scipy.ndimage.morphology import binary_erosion
+import math
 import moviepy.editor as mpy
 import numpy as np
 import torch
@@ -109,7 +110,14 @@ def alpha_matting_cutout(
     erode_structure_size,
     base_size,
 ):
+
+    print('alpha_matting_cutout')
+
     size = img.size
+    print('img.size: ')
+    print(img.size)
+    print('base_size: ')
+    print(base_size)
 
     img.thumbnail((base_size, base_size), Image.LANCZOS)
     mask = mask.resize(img.size, Image.LANCZOS)
@@ -155,6 +163,12 @@ def alpha_matting_cutout(
 def naive_cutout(img, mask):
     empty = Image.new("RGBA", (img.size), 0)
     cutout = Image.composite(img, empty, mask.resize(img.size, Image.LANCZOS))
+    
+    # GmapCars: our resizing to thubmnail
+    h = math.floor(60 / img.width * img.height)
+    print('naive_cutout: w=60 h=', h)
+    cutout = cutout.resize((60,h),Image.LANCZOS)
+
     return cutout
 
 
