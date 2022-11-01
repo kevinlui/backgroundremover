@@ -165,9 +165,9 @@ def naive_cutout(img, mask):
     cutout = Image.composite(img, empty, mask.resize(img.size, Image.LANCZOS))
     
     # GmapCars: our resizing to thubmnail
-    h = math.floor(60 / img.width * img.height)
-    print('naive_cutout: w=60 h=', h)
-    cutout = cutout.resize((60,h),Image.LANCZOS)
+    h = math.floor(96 / img.width * img.height)
+    print('naive_cutout: w=96 h=', h)
+    cutout = cutout.resize((96,h),Image.LANCZOS)
 
     return cutout
 
