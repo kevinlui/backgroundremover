@@ -42,7 +42,7 @@ class Net(torch.nn.Module):
             net = u2net.U2NETP(3, 1)
             path = os.environ.get(
                 "U2NETP_PATH",
-                os.path.expanduser(os.path.join("~", ".u2net", model_name + ".pth")),
+                os.path.expanduser(os.path.join( "~", ".u2net", model_name + ".pth")),
             )
             if (
                 not os.path.exists(path)
@@ -163,11 +163,11 @@ def alpha_matting_cutout(
 def naive_cutout(img, mask):
     empty = Image.new("RGBA", (img.size), 0)
     cutout = Image.composite(img, empty, mask.resize(img.size, Image.LANCZOS))
-    
-    # GmapCars: our resizing to thubmnail
-    h = math.floor(96 / img.width * img.height)
-    print('naive_cutout: w=96 h=', h)
-    cutout = cutout.resize((96,h),Image.LANCZOS)
+
+    # KarSearch map thumbnail size
+    TARGET_SIZE = 96
+    h = math.floor(TARGET_SIZE / img.width * img.height)
+    cutout = cutout.resize((TARGET_SIZE, h), Image.LANCZOS)
 
     return cutout
 

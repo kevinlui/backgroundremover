@@ -11,13 +11,13 @@ with open("requirements.txt") as f:
 
 setup(
     name="backgroundremover",
-    version="0.2.0",
+    version="0.2.1",
     description="Background remover from image and video",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/nadermx/backgroundremover",
-    author="Johnathan Nader",
-    author_email="john@nader.mx",
+    author="Johnathan Nader, adopted by Kevin Lui for KarSearch",
+    author_email="kevinlui@karsearch.com",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3 :: Only",

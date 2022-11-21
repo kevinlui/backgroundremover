@@ -6,7 +6,7 @@ BackgroundRemover is a command line tool to remove background from [image](https
 
 ### Requirements
 
-* python <= 3.6
+* python >=3.6, <4
 * python3.6-dev #or what ever version of python you using
 * torch and torchvision stable version (https://pytorch.org)
 * ffmpeg 4.4+
@@ -40,8 +40,19 @@ pip install --upgrade pip
 pip install backgroundremover
 ```
 Please note that when you first run the program, it will check to see if you have the u2net models, if you do not, it will get them from u2net's google drive, as they say too [here](https://github.com/xuebinqin/U-2-Net#usage-for-salient-object-detection), and in this repo the code that pulls it is [here](https://github.com/nadermx/backgroundremover/blob/main/src/backgroundremover/utilities.py#L289)
-# Usage as a cli
+# Usage as a CLI
+## Kevin Lui Image usage
+
+```bash
+$ pip install -r requirements.txt
+```
+
+```bash
+Kevins-MacBook-Pro:backgroundremover kevinlui$ python -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/t96_6255879869323801928.jpeg"
+```
+
 ## Image
+
 
 Remove the background from a local file image
 
