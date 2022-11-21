@@ -48,7 +48,7 @@ $ pip install -r requirements.txt
 ```
 
 ```bash
-Kevins-MacBook-Pro:backgroundremover kevinlui$ python -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/t96_6255879869323801928.jpeg"
+Kevins-MacBook-Pro:backgroundremover kevinlui$ python3 -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/t96_6255879869323801928.jpeg"
 ```
 
 ## Image
