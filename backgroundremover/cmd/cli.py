@@ -2,7 +2,8 @@ import argparse
 import os
 from distutils.util import strtobool
 from .. import utilities
-from ..bg import remove
+from ..bg import removeBG
+from urllib.parse import urlparse
 
 
 def main():
@@ -157,6 +158,15 @@ def main():
     )
 
     ap.add_argument(
+        "-url",
+        "--url",
+        nargs="?",
+        default="-",
+        type=MyUrlType,
+        help="URL to the image.",
+    )
+
+    ap.add_argument(
         "-bi",
         "--backgroundimage",
         nargs="?",
@@ -184,6 +194,7 @@ def main():
     )
 
     args = ap.parse_args()
+    """"
     if args.input.name.rsplit('.', 1)[1] in ['mp4', 'mov', 'webm', 'ogg', 'gif']:
         if args.mattekey:
             print("utilities.matte_key")
@@ -237,29 +248,39 @@ def main():
                                                    framerate=args.framerate)
 
     else:
-        print("args.model: ", args.model)
-        print("args.alpha_matting: ", args.alpha_matting)
-        print("alpha_matting_foreground_threshold: ", args.alpha_matting_foreground_threshold)
-        print("alpha_matting_background_threshold: ", args.alpha_matting_background_threshold)
-        print("alpha_matting_erode_size: ", args.alpha_matting_erode_size)
-        print("alpha_matting_base_size: ", args.alpha_matting_base_size)
-        print("args.output.name: ", args.output.name)
+    """
+    print("args.input.name: ", args.input.name)
+    # print("args.input.name: ", args.url.name)
+    print("args.output.name: ", args.output.name)
+    print("args.model: ", args.model)
+    print("args.alpha_matting: ", args.alpha_matting)
+    print("alpha_matting_foreground_threshold: ", args.alpha_matting_foreground_threshold)
+    print("alpha_matting_background_threshold: ", args.alpha_matting_background_threshold)
+    print("alpha_matting_erode_size: ", args.alpha_matting_erode_size)
+    print("alpha_matting_base_size: ", args.alpha_matting_base_size)
 
-        r = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
-        w = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
-        
-        w(
-            args.output,
-            remove(
-                r(args.input),
-                model_name=args.model,
-                alpha_matting=args.alpha_matting,
-                alpha_matting_foreground_threshold=args.alpha_matting_foreground_threshold,
-                alpha_matting_background_threshold=args.alpha_matting_background_threshold,
-                alpha_matting_erode_structure_size=args.alpha_matting_erode_size,
-                alpha_matting_base_size=args.alpha_matting_base_size,
-            ),
-        )
+    rd = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
+    wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
+    
+    wr(
+        args.output,
+        removeBG(
+            # rd(args.input),
+            rd(args.url),
+            model_name=args.model,
+            alpha_matting=args.alpha_matting,
+            alpha_matting_foreground_threshold=args.alpha_matting_foreground_threshold,
+            alpha_matting_background_threshold=args.alpha_matting_background_threshold,
+            alpha_matting_erode_structure_size=args.alpha_matting_erode_size,
+            alpha_matting_base_size=args.alpha_matting_base_size,
+        ),
+    )
+
+def MyUrlType(arg):
+    url = urlparse(arg)
+    if all((url.scheme, url.netloc)):  # possibly other sections?
+        return url  # return url object, or arg str
+    raise argparse.ArgumentTypeError('Invalid URL')
 
 
 if __name__ == "__main__":

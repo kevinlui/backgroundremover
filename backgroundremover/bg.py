@@ -181,7 +181,7 @@ def get_model(model_name):
         return detect.load_model(model_name="u2net")
 
 
-def remove(
+def removeBG(
     data,
     model_name="u2net",
     alpha_matting=False,
