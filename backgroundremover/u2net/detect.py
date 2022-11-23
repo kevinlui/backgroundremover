@@ -49,8 +49,7 @@ def load_model(model_name: str = "u2net"):
             os.path.expanduser(os.path.join("~", ".u2net", model_name + ".pth")),
         )
         if (
-            not os.path.exists(path)
-            or hasher.md5(path) != "09fb4e49b7f785c9f855baf94916840a"
+            not os.path.exists(path) # or need to check hasher.md5(path) ?
         ):
             utilities.download_files_from_github(
                 path, model_name

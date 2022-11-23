@@ -48,7 +48,7 @@ class Net(torch.nn.Module):
                 not os.path.exists(path)
                 or hasher.md5(path) != "e4f636406ca4e2af789941e7f139ee2e"
             ):
-                utilities.download_downloadfiles_from_github(
+                utilities.downloadfiles_from_github(
                     path, model_name
                 )
 
@@ -62,7 +62,7 @@ class Net(torch.nn.Module):
                 not os.path.exists(path)
                 or hasher.md5(path) != "09fb4e49b7f785c9f855baf94916840a"
             ):
-                utilities.download_downloadfiles_from_github(
+                utilities.downloadfiles_from_github(
                     path, model_name
                 )
 
@@ -76,7 +76,7 @@ class Net(torch.nn.Module):
                 not os.path.exists(path)
                 or hasher.md5(path) != "347c3d51b01528e5c6c071e3cff1cb55"
             ):
-                utilities.download_downloadfiles_from_github(
+                utilities.downloadfiles_from_github(
                     path, model_name
                 )
         else:

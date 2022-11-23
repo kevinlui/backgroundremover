@@ -1,4 +1,5 @@
 import argparse
+import requests
 import os
 from distutils.util import strtobool
 from .. import utilities
@@ -248,9 +249,8 @@ def main():
                                                    framerate=args.framerate)
 
     else:
-    """
-    print("args.input.name: ", args.input.name)
-    # print("args.input.name: ", args.url.name)
+    print("args.url: ", args.url)
+    # print("args.input.name: ", args.input.name)
     print("args.output.name: ", args.output.name)
     print("args.model: ", args.model)
     print("args.alpha_matting: ", args.alpha_matting)
@@ -258,14 +258,32 @@ def main():
     print("alpha_matting_background_threshold: ", args.alpha_matting_background_threshold)
     print("alpha_matting_erode_size: ", args.alpha_matting_erode_size)
     print("alpha_matting_base_size: ", args.alpha_matting_base_size)
+    """
 
-    rd = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
     wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
-    
+
+    """
+    # file input code
+    rd = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
     wr(
         args.output,
         removeBG(
-            # rd(args.input),
+            rd(args.input),
+            model_name=args.model,
+            alpha_matting=args.alpha_matting,
+            alpha_matting_foreground_threshold=args.alpha_matting_foreground_threshold,
+            alpha_matting_background_threshold=args.alpha_matting_background_threshold,
+            alpha_matting_erode_structure_size=args.alpha_matting_erode_size,
+            alpha_matting_base_size=args.alpha_matting_base_size,
+        ),
+    )
+    """
+
+    # url arg code
+    rd = lambda i: requests.get(args.url).content
+    wr(
+        args.output,
+        removeBG(
             rd(args.url),
             model_name=args.model,
             alpha_matting=args.alpha_matting,
@@ -276,10 +294,12 @@ def main():
         ),
     )
 
+    
+
 def MyUrlType(arg):
     url = urlparse(arg)
     if all((url.scheme, url.netloc)):  # possibly other sections?
-        return url  # return url object, or arg str
+        return arg  # return url object, or arg str
     raise argparse.ArgumentTypeError('Invalid URL')
 
 
