@@ -47,9 +47,19 @@ Please note that when you first run the program, it will check to see if you hav
 $ pip install -r requirements.txt
 ```
 
+Note: we added dependency to google cloud storage
 ```bash
-Kevins-MacBook-Pro:backgroundremover kevinlui$ python3 -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/t96_6255879869323801928.jpeg"
+pip install google-cloud-storage
 ```
+
+```bash
+python3 -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/localfile_tn.png"
+
+python3 -m backgroundremover.cmd.cli -url "https://images.autotrader.com/hn/c/dee7dc03bbe04fc1a5ac6619149581c5.jpg" -o "examplefiles/localfile_tn.png"
+
+python3 -m backgroundremover.cmd.cli -url "https://images.autotrader.com/hn/c/dee7dc03bbe04fc1a5ac6619149581c5.jpg" -s "atr/cloud-storageID_tn.png"
+```
+
 
 ## Image
 

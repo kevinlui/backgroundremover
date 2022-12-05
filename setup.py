@@ -15,8 +15,8 @@ setup(
     description="Background remover from image and video",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nadermx/backgroundremover",
-    author="Johnathan Nader, adopted by Kevin Lui for KarSearch",
+    url="https://github.com/kevinlui/backgroundremover",
+    author="Kevin Lui, for KarSearch",
     author_email="kevinlui@karsearch.com",
     classifiers=[
         "License :: OSI Approved :: MIT License",

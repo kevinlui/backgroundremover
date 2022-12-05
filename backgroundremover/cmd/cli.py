@@ -5,6 +5,7 @@ from distutils.util import strtobool
 from .. import utilities
 from ..bg import removeBG
 from urllib.parse import urlparse
+from google.cloud import storage
 
 
 def main():
@@ -194,7 +195,17 @@ def main():
         help="Path to the output",
     )
 
+    ap.add_argument(
+        "-s",
+        "--storage",
+        nargs="?",
+        default="-",
+        type=str,
+        help="Path under the Google Cloud Storage bucket ks-img",
+    )
+
     args = ap.parse_args()
+
     """"
     if args.input.name.rsplit('.', 1)[1] in ['mp4', 'mov', 'webm', 'ogg', 'gif']:
         if args.mattekey:
@@ -260,11 +271,10 @@ def main():
     print("alpha_matting_base_size: ", args.alpha_matting_base_size)
     """
 
-    wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
-
     """
     # file input code
     rd = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
+    wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
     wr(
         args.output,
         removeBG(
@@ -279,22 +289,39 @@ def main():
     )
     """
 
-    # url arg code
-    rd = lambda i: requests.get(args.url).content
-    wr(
-        args.output,
+    # see following if we can speed up utilizing hyper-threading om the I/O operations:
+    #   https://towardsdatascience.com/demystifying-python-multiprocessing-and-multithreading-9b62f9875a27
+
+    #wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
+
+    upload_data_to_gcs('ks-img', args.storage, 
         removeBG(
-            rd(args.url),
+            requests.get(args.url).content, # make Http Requests on the URL 
             model_name=args.model,
             alpha_matting=args.alpha_matting,
             alpha_matting_foreground_threshold=args.alpha_matting_foreground_threshold,
             alpha_matting_background_threshold=args.alpha_matting_background_threshold,
             alpha_matting_erode_structure_size=args.alpha_matting_erode_size,
             alpha_matting_base_size=args.alpha_matting_base_size,
-        ),
+        ).tobytes()
     )
 
-    
+def upload_data_to_gcs(bucket_name, target_key, data):
+    try:
+        # https://cloud.google.com/storage/docs/uploading-objects-from-memory
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(target_key)
+        blob.upload_from_string(data, content_type='image/png')
+        url = bucket.blob(target_key).public_url
+        print("Uploaded storage Url = ", url)
+        return url
+
+    except Exception as e:
+        print(e)
+
+    return None
+
 
 def MyUrlType(arg):
     url = urlparse(arg)
