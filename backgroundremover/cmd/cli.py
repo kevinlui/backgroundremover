@@ -271,8 +271,11 @@ def main():
     print("alpha_matting_base_size: ", args.alpha_matting_base_size)
     """
 
+    # *********************************
+    # - Input: file system
+    # - Output: file system
+    # *********************************
     """
-    # file input code
     rd = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
     wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
     wr(
@@ -289,11 +292,31 @@ def main():
     )
     """
 
-    # see following if we can speed up utilizing hyper-threading om the I/O operations:
-    #   https://towardsdatascience.com/demystifying-python-multiprocessing-and-multithreading-9b62f9875a27
+    # *********************************
+    # - Input: URL
+    # - Output: file system
+    # *********************************
+    """
+    wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
+    wr(
+        args.output,
+        removeBG(
+            requests.get(args.url).content, # make Http Requests on the URL 
+            model_name=args.model,
+            alpha_matting=args.alpha_matting,
+            alpha_matting_foreground_threshold=args.alpha_matting_foreground_threshold,
+            alpha_matting_background_threshold=args.alpha_matting_background_threshold,
+            alpha_matting_erode_structure_size=args.alpha_matting_erode_size,
+            alpha_matting_base_size=args.alpha_matting_base_size,
+        ),
+    )
+    """
 
-    #wr = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
 
+    # *********************************
+    # - Input: URL
+    # - Output: Google Cloud Storage
+    # *********************************
     upload_data_to_gcs('ks-img', args.storage, 
         removeBG(
             requests.get(args.url).content, # make Http Requests on the URL 
@@ -305,6 +328,10 @@ def main():
             alpha_matting_base_size=args.alpha_matting_base_size,
         ).tobytes()
     )
+
+    # TODO: can speed up utilizing hyper-threading on the I/O operations:
+    #   https://towardsdatascience.com/demystifying-python-multiprocessing-and-multithreading-9b62f9875a27
+
 
 def upload_data_to_gcs(bucket_name, target_key, data):
     try:

@@ -160,14 +160,18 @@ def alpha_matting_cutout(
     return cutout
 
 
-def naive_cutout(img, mask):
-    empty = Image.new("RGBA", (img.size), 0)
-    cutout = Image.composite(img, empty, mask.resize(img.size, Image.LANCZOS))
+def naive_cutout(inputImg, mask):
+    empty = Image.new("RGBA", (inputImg.size), 0)
+    cutout = Image.composite(inputImg, empty, mask.resize(inputImg.size, Image.LANCZOS))
 
-    # KarSearch map thumbnail size
-    TARGET_SIZE = 96
-    h = math.floor(TARGET_SIZE / img.width * img.height)
-    cutout = cutout.resize((TARGET_SIZE, h), Image.LANCZOS)
+    KS_THUMBNAIL_WIDTH = 96
+    # Cutout to crop out transparent background, to maximize car size before scaling down to thumbnail
+    # - https://stackoverflow.com/questions/1905421/crop-a-png-image-to-its-minimum-size
+    cutout = cutout.crop(cutout.getbbox())
+    tnHeight = math.floor(KS_THUMBNAIL_WIDTH / cutout.width * cutout.height)
+    cutout.thumbnail((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
+    #tnHeight = math.floor(KS_THUMBNAIL_WIDTH / inputImg.width * inputImg.height)
+    #cutout = cutout.resize((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
 
     return cutout
 
@@ -191,12 +195,12 @@ def removeBG(
     alpha_matting_base_size=1000,
 ):
     model = get_model(model_name)
-    img = Image.open(io.BytesIO(input_img_data)).convert("RGB")
-    mask = detect.predict(model, np.array(img)).convert("L")
+    inputImg = Image.open(io.BytesIO(input_img_data)).convert("RGB")
+    mask = detect.predict(model, np.array(inputImg)).convert("L")
 
     if alpha_matting:
         cutout = alpha_matting_cutout(
-            img,
+            inputImg,
             mask,
             alpha_matting_foreground_threshold,
             alpha_matting_background_threshold,
@@ -204,7 +208,7 @@ def removeBG(
             alpha_matting_base_size,
         )
     else:
-        cutout = naive_cutout(img, mask)
+        cutout = naive_cutout(inputImg, mask)
 
     bio = io.BytesIO()
     cutout.save(bio, "PNG")

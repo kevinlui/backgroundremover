@@ -52,6 +52,7 @@ Note: we added dependency to google cloud storage
 pip install google-cloud-storage
 ```
 
+3 possible modes to run (need to change source code)
 ```bash
 python3 -m backgroundremover.cmd.cli -i "examplefiles/6255879869323801928.jpeg" -o "examplefiles/localfile_tn.png"
 
