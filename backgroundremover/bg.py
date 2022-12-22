@@ -110,14 +110,9 @@ def alpha_matting_cutout(
     erode_structure_size,
     base_size,
 ):
-
     print('alpha_matting_cutout')
 
-    size = img.size
-    print('img.size: ')
-    print(img.size)
-    print('base_size: ')
-    print(base_size)
+    # size = img.size
 
     img.thumbnail((base_size, base_size), Image.LANCZOS)
     mask = mask.resize(img.size, Image.LANCZOS)
@@ -155,7 +150,16 @@ def alpha_matting_cutout(
 
     cutout = np.clip(cutout * 255, 0, 255).astype(np.uint8)
     cutout = Image.fromarray(cutout)
-    cutout = cutout.resize(size, Image.LANCZOS)
+    # Original code simply resize to original image size
+    #cutout = cutout.resize(size, Image.LANCZOS)
+
+    # Cutout to crop out transparent background, to maximize car size before scaling down to thumbnail
+    # - https://stackoverflow.com/questions/1905421/crop-a-png-image-to-its-minimum-size
+    cutout = cutout.crop(cutout.getbbox())
+    # resize down to TN for KarSearch
+    KS_THUMBNAIL_WIDTH = 96
+    tnHeight = math.floor(KS_THUMBNAIL_WIDTH / cutout.width * cutout.height)
+    cutout.thumbnail((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
 
     return cutout
 
@@ -164,6 +168,7 @@ def naive_cutout(inputImg, mask):
     empty = Image.new("RGBA", (inputImg.size), 0)
     cutout = Image.composite(inputImg, empty, mask.resize(inputImg.size, Image.LANCZOS))
 
+    # resize down to TN for KarSearch
     KS_THUMBNAIL_WIDTH = 96
     # Cutout to crop out transparent background, to maximize car size before scaling down to thumbnail
     # - https://stackoverflow.com/questions/1905421/crop-a-png-image-to-its-minimum-size
