@@ -204,6 +204,7 @@ def main():
 
     args = ap.parse_args()
 
+    """"
     if (args.url is not None):
         print("-url: %s" % args.url)
     if (args.in_file is not None):
@@ -214,7 +215,6 @@ def main():
         print("-storage: %s" % args.storage)
 
 
-    """"
     if args.in_file.name.rsplit('.', 1)[1] in ['mp4', 'mov', 'webm', 'ogg', 'gif']:
         if args.mattekey:
             print("utilities.matte_key")

@@ -165,20 +165,20 @@ def alpha_matting_cutout(
 
 
 def naive_cutout(inputImg, mask):
-    print("inputImg w:, h:", inputImg.width, inputImg.height)
+    # print("inputImg w:, h:", inputImg.width, inputImg.height)
     empty = Image.new("RGBA", (inputImg.size), 0)
     cutout = Image.composite(inputImg, empty, mask.resize(inputImg.size, Image.LANCZOS))
-    print("cutout w:, h:", cutout.width, cutout.height)
+    # print("cutout w:, h:", cutout.width, cutout.height)
 
     # resize down to TN for KarSearch
     KS_THUMBNAIL_WIDTH = 96
     # Cutout to crop out transparent background, to maximize car size before scaling down to thumbnail
     # - https://stackoverflow.com/questions/1905421/crop-a-png-image-to-its-minimum-size
     cutout = cutout.crop(cutout.getbbox())
-    print("cropped-cutout w:, h:", cutout.width, cutout.height)
+    # print("cropped-cutout w:, h:", cutout.width, cutout.height)
     tnHeight = math.floor(KS_THUMBNAIL_WIDTH / cutout.width * cutout.height)
     cutout.thumbnail((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
-    print("resized-cutout w:, h:", cutout.width, cutout.height)
+    # print("resized-cutout w:, h:", cutout.width, cutout.height)
 
     #tnHeight = math.floor(KS_THUMBNAIL_WIDTH / inputImg.width * inputImg.height)
     #cutout = cutout.resize((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
