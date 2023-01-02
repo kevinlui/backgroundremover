@@ -2,6 +2,15 @@ import io
 import os
 import typing
 from PIL import Image, ImageOps
+import matplotlib.image as img_matplotlib
+import binascii
+import scipy
+import scipy.misc
+import scipy.cluster
+from scipy.cluster.vq import whiten
+from scipy.cluster.vq import kmeans
+import pandas as pd
+
 from pymatting.alpha.estimate_alpha_cf import estimate_alpha_cf
 from pymatting.foreground.estimate_foreground_ml import estimate_foreground_ml
 from pymatting.util.util import stack_images
@@ -163,10 +172,91 @@ def alpha_matting_cutout(
 
     return cutout
 
+# https://stackoverflow.com/questions/71748559/given-an-image-crop-of-vehicle-how-to-find-the-colour-of-the-vehicle-with-image
+def get_dominant_color_3(pil_img, palette_size=16):
+    # Resize image to speed up processing
+    img = pil_img.copy()
+    img.thumbnail((100, 100))
+
+    # Reduce colors (uses k-means internally)
+    paletted = img.convert('P', palette=Image.ADAPTIVE, colors=palette_size)
+
+    # Find the color that occurs most often
+    palette = paletted.getpalette()
+    color_counts = sorted(paletted.getcolors(), reverse=True)
+    palette_index = color_counts[0][1]
+    dominant_color = palette[palette_index*3:palette_index*3+3]
+
+    print(dominant_color)
+
+    return dominant_color
+
+# https://stackoverflow.com/questions/3241929/python-find-dominant-most-common-color-in-an-image
+def get_dominant_colors_2(im):
+    NUM_CLUSTERS = 5
+
+    ar = np.asarray(im)
+    shape = ar.shape
+    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
+
+    print('finding clusters')
+    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
+    print('cluster centres:\n', codes)
+
+    vecs, dist = scipy.cluster.vq.vq(ar, codes)         # assign codes
+    counts, bins = scipy.histogram(vecs, len(codes))    # count occurrences
+
+    index_max = scipy.argmax(counts)                    # find most frequent
+    peak = codes[index_max]
+    colour = binascii.hexlify(bytearray(int(c) for c in peak)).decode('ascii')
+
+    print('most frequent is %s (#%s)' % (peak, colour))
+
+
+# https://www.geeksforgeeks.org/extract-dominant-colors-of-an-image-using-python/
+def get_dominant_colors(pil_image):
+    arr = img_matplotlib.pil_to_array(pil_image)
+    r = []
+    g = []
+    b = []
+    for row in arr:
+        for temp_r, temp_g, temp_b, temp in row:    # temp sometimes exist
+            r.append(temp_r)
+            g.append(temp_g)
+            b.append(temp_b)
+   
+    image_df = pd.DataFrame({'red' : r,
+                          'green' : g,
+                          'blue' : b})
+  
+    image_df['scaled_color_red'] = whiten(image_df['red'])
+    image_df['scaled_color_blue'] = whiten(image_df['blue'])
+    image_df['scaled_color_green'] = whiten(image_df['green'])
+  
+    cluster_centers, _ = kmeans(image_df[['scaled_color_red',
+                                        'scaled_color_blue',
+                                        'scaled_color_green']], 3)
+  
+    dominant_colors = []
+    
+    red_std, green_std, blue_std = image_df[['red',
+                                            'green',
+                                            'blue']].std()
+    
+    for cluster_center in cluster_centers:
+        red_scaled, green_scaled, blue_scaled = cluster_center
+        dominant_colors.append((
+            red_scaled * red_std / 255,
+            green_scaled * green_std / 255,
+            blue_scaled * blue_std / 255
+        ))
+
+    print([dominant_colors])
+
 
 def naive_cutout(inputImg, mask):
     # print("inputImg w:, h:", inputImg.width, inputImg.height)
-    empty = Image.new("RGBA", (inputImg.size), 0)
+    empty = Image.new("RGBA", (inputImg.size), 0)   # need "RGBA" to have transparent background
     cutout = Image.composite(inputImg, empty, mask.resize(inputImg.size, Image.LANCZOS))
     # print("cutout w:, h:", cutout.width, cutout.height)
 
@@ -177,8 +267,9 @@ def naive_cutout(inputImg, mask):
     cutout = cutout.crop(cutout.getbbox())
     # print("cropped-cutout w:, h:", cutout.width, cutout.height)
     tnHeight = math.floor(KS_THUMBNAIL_WIDTH / cutout.width * cutout.height)
-    cutout.thumbnail((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
+    cutout.thumbnail((KS_THUMBNAIL_WIDTH, tnHeight), Image.Resampling.LANCZOS)
     # print("resized-cutout w:, h:", cutout.width, cutout.height)
+    #get_dominant_color_3(cutout)
 
     #tnHeight = math.floor(KS_THUMBNAIL_WIDTH / inputImg.width * inputImg.height)
     #cutout = cutout.resize((KS_THUMBNAIL_WIDTH, tnHeight), Image.LANCZOS)
@@ -206,6 +297,9 @@ def removeBG(
 ):
     model = get_model(model_name)
     inputImg = Image.open(io.BytesIO(input_img_data)).convert("RGB")
+
+    #get_dominant_color_3(inputImg)
+
     # https://stackoverflow.com/questions/63947990/why-are-width-and-height-of-an-image-are-inverted-when-loading-using-pil-versus
     inputImg = ImageOps.exif_transpose(inputImg)
     mask = detect.predict(model, np.array(inputImg)).convert("L")
